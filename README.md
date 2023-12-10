@@ -1,73 +1,55 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# book-list-api
+Internship 2023 - Book List API (NestJS with authentication and authorization, Prisma, PostgreSQL)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is a simple CRUD API project to practice working with NestJs, PostgreSQL and Prisma ORM. Users can sign up to add books and categories to favoutes.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Running the app
 
-## Description
+If you want to run only the database in Docker, change host from "postgres" to "localhost" in db.env and in .env files, and comment out the backend and pgadmin services from the docker-compose file. After that run <b>$npm install</b>.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+To start the containers, run <b>$docker-compose up</b>. Next, run (in Docker CLI for backend image, or if using Docker only for the database, in regular CLI) <b>$npx prisma migrate dev</b> to sync the database with the schema, and then run <b>$npx prisma db seed</b> to populate the database with sample data.
 
-## Installation
+# Project structure
 
-```bash
-$ npm install
-```
+The prisma folder contains the schema.prisma file, where the database models are specified, the seed.ts file, used to populate the database and a migrations folder. Docker-related files and files containing environment variables are in the root directory. Other project files are in the src folder, has the following structure:
+- the entry file (main.ts) and the main (app) module;
+- app folder, containing all the resources (with a module, a controller and a service for each one): auth, books, categories and users;
+- domain folder, containing all the dtos, entities and repos (services to interact with the database - for each model);
+- libs folder, containing a prisma folder with the prisma module and service, and a security folder with passport strategies, authentication and authorization guards and decorators and a role enum. 
 
-## Running the app
+# Description
 
-```bash
-# development
-$ npm run start
+The database schema includes models for books, categories and users (all relations are MANY-To-MANY). A book may have many categories, and a category may have many books. And a user can mark multiple books and categories as favourite. 
 
-# watch mode
-$ npm run start:dev
+The API implements passport jwt strategy for acces tokens as well as refresh token rotation for authentication and authorization. Some routes are public, others are protected. Some of the protected routes require a user to have a certain role. 
 
-# production mode
-$ npm run start:prod
-```
+When a user is created (when they sign up), they are not automatically authenticated. Sign-up route is handled by the users controller, not by the auth controller.
 
-## Test
+Public routes - routes that are accessible for everyone, including unauthenticated users:
+1. POST "/auth/login" to sign in, 
+2. POST "/users" to sign up, 
+3. GET "/books" to view all books,
+4. GET "/books/:bookId" to view a particaular book,
+5. GET "/categories" to view all categories,
+6. GET "/categories/:categoryId" to view a particaular category.
 
-```bash
-# unit tests
-$ npm run test
+Roles:
+1. <b>user</b> - an authenticated user can mark books and categories as favourites and delete books and categories from favourites, a regular user can also update their own information() and delete themselves;
+2. <b>admin</b> - an admin can add, update (update the general info of a book or a category and connect books with categories and categories with books) and delete books and categories;
+3. <b>super-admin</b> - a super-admin can view and delete users, and can assign different roles to users.
 
-# e2e tests
-$ npm run test:e2e
+So, only the user themselves can change their information. A super-admin can only view (password field is excluded) or delete a user, and modify their role and not the other information.
 
-# test coverage
-$ npm run test:cov
-```
+Used features and techniques:
+- using @Body(), @Request(), @Param() in route handlers,
+- excluding passwords from the response with an interceptor,
+- implementing basic validation with a validation pipe using class-validator and class-transformer,
+- using bcrypt to hash passwords and refresh tokens,
+- using passport to configure jwt and refresh token strategies,
+- using a global jwt-auth guard for authentication and a public decorator to make some routes public,
+- using a roles guard with a roles decorator for authorization to specify necessary roles to acces routes,
+- using config module to use environment variables (including authentication secrets).
 
-## Support
+# Issues
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+Issues: route handlers using only @Request() without @Body() - GET /users/user and DELETE /users/delete - don't work as expected unless put before the handlers for routes that require the roles of admin or super-admin (these 2 routes require just an authenticated user).
