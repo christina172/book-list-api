@@ -49,7 +49,3 @@ Used features and techniques:
 - using a global jwt-auth guard for authentication and a public decorator to make some routes public,
 - using a roles guard with a roles decorator for authorization to specify necessary roles to acces routes,
 - using config module to use environment variables (including authentication secrets).
-
-# Issues
-
-Issues: route handlers using only @Request() without @Body() - GET /users/user and DELETE /users/delete - don't work as expected unless put before the handlers for routes that require the roles of admin or super-admin (these 2 routes require just an authenticated user).

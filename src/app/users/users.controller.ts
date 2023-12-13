@@ -20,14 +20,11 @@ export class UsersController {
   }
 
   // the password is included in the response
-  // issue: works only if placed before routes that require roles of admin or super-admin, 
-  // issue: otherwise works only for super-admin (isn't forbidden), but still doesn't return anything
   @Get('/user')
   async findUser(@Request() req) {
     return this.usersService.findById(req.user.sub);
   }
 
-  // issue: works only if placed before routes that require roles of admin or super-admin
   @Delete('/delete')
   async deleteUser(@Request() req) {
     return this.usersService.delete(req.user.sub);
