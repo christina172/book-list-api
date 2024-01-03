@@ -3,13 +3,13 @@ Internship 2023 - Book List API (NestJS with authentication and authorization, P
 
 This is a simple CRUD API project to practice working with NestJs, PostgreSQL and Prisma ORM. Users can sign up to add books and categories to favoutes.
 
-# Running the app
+## Running the app
 
 If you want to run only the database in Docker, change host from "postgres" to "localhost" in db.env and in .env files, and comment out the backend and pgadmin services from the docker-compose file. After that run <b>$npm install</b>.
 
 To start the containers, run <b>$docker-compose up</b>. Next, run (in Docker CLI for backend image, or if using Docker only for the database, in regular CLI) <b>$npx prisma migrate dev</b> to sync the database with the schema, and then run <b>$npx prisma db seed</b> to populate the database with sample data.
 
-# Project structure
+## Project structure
 
 The prisma folder contains the schema.prisma file, where the database models are specified, the seed.ts file, used to populate the database and a migrations folder. Docker-related files and files containing environment variables are in the root directory. Other project files are in the src folder, has the following structure:
 - the entry file (main.ts) and the main (app) module;
@@ -17,7 +17,7 @@ The prisma folder contains the schema.prisma file, where the database models are
 - domain folder, containing all the dtos, entities and repos (services to interact with the database - for each model);
 - libs folder, containing a prisma folder with the prisma module and service, and a security folder with passport strategies, authentication and authorization guards and decorators and a role enum. 
 
-# Description
+## Description
 
 The database schema includes models for books, categories and users (all relations are MANY-To-MANY). A book may have many categories, and a category may have many books. And a user can mark multiple books and categories as favourite. 
 
